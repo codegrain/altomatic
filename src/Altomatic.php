@@ -89,6 +89,7 @@ class Altomatic extends Plugin
             ['label' => '— Select field —', 'value' => ''],
             ['label' => 'Use Asset Title', 'value' => 'title'],
         ];
+        
         foreach ($fieldsService->getAllFields() as $field) {
             if ($field instanceof \craft\fields\PlainText) {
                 $fieldOptions[] = ['label' => $field->name . ' (' . $field->handle . ')', 'value' => $field->handle];
