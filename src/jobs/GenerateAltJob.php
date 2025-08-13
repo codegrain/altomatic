@@ -22,7 +22,7 @@ class GenerateAltJob extends BaseJob
                 continue;
             }
             try {
-                Altomatic::$plugin->get('altomaticService')->generateForAsset($asset);
+                Altomatic::$plugin->altomaticService->generateForAsset($asset);
             } catch (\Throwable $e) {
                 Craft::error("Altomatic job error for asset {$id}: " . $e->getMessage(), __METHOD__);
             }

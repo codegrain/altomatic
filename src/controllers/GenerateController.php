@@ -13,7 +13,7 @@ class GenerateController extends Controller
 {
     protected array|int|bool $allowAnonymous = false;
 
-    public function actionGenerateForAsset(int $assetId): Response
+    public function actionGenerateForAsset(int $assetId): \yii\web\Response
     {
         $this->requirePermission('altomatic:generate');
 
@@ -23,7 +23,7 @@ class GenerateController extends Controller
             throw new BadRequestHttpException('Asset not found.');
         }
 
-        Altomatic::$plugin->get('altomaticService')->generateForAsset($asset);
+        Altomatic::$plugin->altomaticService->generateForAsset($asset);
 
         Craft::$app->getSession()->setNotice('ALT generated (if needed).');
         return $this->redirectToPostedUrl($asset) ?: $this->redirect(Craft::$app->getRequest()->getReferrer() ?? '/admin/assets');

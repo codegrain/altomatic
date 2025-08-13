@@ -6,21 +6,25 @@ use craft\base\Element;
 use craft\base\Plugin;
 use craft\elements\Asset;
 use craft\events\DefineHtmlEvent;
-use craft\helpers\UrlHelper;
 use craft\events\RegisterElementActionsEvent;
 use craft\events\RegisterUrlRulesEvent;
-use craft\services\UserPermissions;
 use craft\events\RegisterUserPermissionsEvent;
+use craft\helpers\UrlHelper;
+use craft\services\UserPermissions;
 use craft\web\UrlManager;
 use yii\base\Event;
+
 use altomatic\models\Settings;
 use altomatic\assetbundles\cp\CpAssetBundle;
 use altomatic\elements\actions\GenerateAltForAssets;
+use altomatic\services\AltomaticService;
 
+/**
+ * @property-read AltomaticService $altomaticService
+ */
 class Altomatic extends Plugin
 {
     public bool $hasCpSettings = true;
-
     public static Altomatic $plugin;
 
     public function init(): void
@@ -28,57 +32,44 @@ class Altomatic extends Plugin
         parent::init();
         self::$plugin = $this;
 
-        // CP routes
-        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['altomatic/generate/asset/<assetId:\d+>'] = 'altomatic/generate/generate-for-asset';
-                $event->rules['altomatic/generate/queue-all'] = 'altomatic/generate/queue-all';
+        $this->setComponents([
+            'altomaticService' => AltomaticService::class,
+        ]);
+
+        // routes
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
+            $event->rules['altomatic/generate/asset/<assetId:\d+>'] = 'altomatic/generate/generate-for-asset';
+            $event->rules['altomatic/generate/asset'] = 'altomatic/generate/generate-for-asset';
+            $event->rules['altomatic/generate/queue-all'] = 'altomatic/generate/queue-all';
+        });
+
+        // permissions
+        Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function (RegisterUserPermissionsEvent $event) {
+            $event->permissions['Altomatic'] = [
+                'altomatic:generate' => ['label' => Craft::t('app', 'Generate ALT text')],
+                'altomatic:settings' => ['label' => Craft::t('app', 'Manage Altomatic settings')],
+            ];
+        });
+
+        // bulk action
+        Event::on(Asset::class, Element::EVENT_REGISTER_ACTIONS, function (RegisterElementActionsEvent $event) {
+            $event->actions[] = GenerateAltForAssets::class;
+        });
+
+        // per-asset sidebar button
+        Event::on(Asset::class, Element::EVENT_DEFINE_SIDEBAR_HTML, static function (DefineHtmlEvent $event) {
+            if (!Craft::$app->getUser()->checkPermission('altomatic:generate')) {
+                return;
             }
-        );
-
-        // Permissions
-        Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS,
-            function (RegisterUserPermissionsEvent $event) {
-                $event->permissions['Altomatic'] = [
-                    'altomatic:generate' => ['label' => Craft::t('app', 'Generate ALT text')],
-                    'altomatic:settings' => ['label' => Craft::t('app', 'Manage Altomatic settings')],
-                ];
+            $asset = $event->sender;
+            if (!$asset instanceof Asset || !$asset->id || $asset->kind !== Asset::KIND_IMAGE) {
+                return;
             }
-        );
+            $url = UrlHelper::cpUrl('altomatic/generate/asset/'.$asset->id);
+            $event->html .= '<div class="meta"><a class="btn submit fullwidth" href="'.$url.'">' .
+                Craft::t('app', 'Generate ALT with Altomatic') . '</a></div>';
+        });
 
-        // Register element action for Assets
-        Event::on(Asset::class, Element::EVENT_REGISTER_ACTIONS,
-            function (RegisterElementActionsEvent $event) {
-                $event->actions[] = GenerateAltForAssets::class;
-            }
-        );
-
-        // Add a sidebar button on each Asset edit page
-        Event::on(
-            Asset::class,
-            Element::EVENT_DEFINE_SIDEBAR_HTML,
-            function (DefineHtmlEvent $event) {
-                if (!Craft::$app->getUser()->checkPermission('altomatic:generate')) {
-                    return;
-                }
-
-                $asset = $event->sender;
-                if (!$asset instanceof Asset) {
-                    return;
-                }
-                if (!$asset->id || $asset->kind !== Asset::KIND_IMAGE) {
-                    return;
-                }
-
-                $url = UrlHelper::cpUrl('altomatic/generate/asset', ['assetId' => $asset->id]);
-                $btn = '<div class="meta"><a class="btn submit fullwidth" href="'.$url.'">' .
-                    Craft::t('app', 'Generate ALT with Altomatic') . '</a></div>';
-
-                $event->html .= $btn;
-            }
-        );
-
-        // Register a small CP asset to inject a “Generate All” button on /admin/assets
         if (Craft::$app->getRequest()->getIsCpRequest()) {
             Craft::$app->getView()->registerAssetBundle(CpAssetBundle::class);
         }
@@ -118,5 +109,10 @@ class Altomatic extends Plugin
         if (!$user->getIsAdmin() && !$user->checkPermission($permission)) {
             throw new \yii\web\ForbiddenHttpException('Insufficient permissions.');
         }
+    }
+
+    public function getAltomaticService(): AltomaticService
+    {
+        return $this->get('altomaticService');
     }
 }
