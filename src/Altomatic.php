@@ -81,7 +81,7 @@ class Altomatic extends Plugin
         return new Settings();
     }
 
-    public function getSettingsResponse()
+    public function getSettingsResponse(): mixed
     {
         $this->requireAdminOrPermission('altomatic:settings');
 
