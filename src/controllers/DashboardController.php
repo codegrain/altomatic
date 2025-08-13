@@ -23,4 +23,15 @@ class DashboardController extends Controller
             'logs'  => $logs,
         ]);
     }
+
+    public function actionSettings(): Response
+    {
+        $this->requirePermission('altomatic:settings');
+
+        return $this->renderTemplate('altomatic/settings', [
+            'settings' => Altomatic::$plugin->getSettings(),
+            'fieldOptions' => [],
+            'title' => 'Altomatic Settings',
+        ]);
+    }
 }

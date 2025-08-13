@@ -1,5 +1,4 @@
 (function () {
-  // Add a toolbar button on the Assets index to queue ALL images.
   function addGenerateAllButton() {
     if (!window.Craft || !document.body) return;
     const path = location.pathname.replace(/\/+$/, '');
@@ -8,7 +7,6 @@
     const header = document.querySelector('.page-header, header[role="banner"] ~ .content-header, .content-header');
     if (!header) return;
 
-    // Avoid duplicates
     if (document.querySelector('[data-altomatic-generate-all]')) return;
 
     const btn = document.createElement('button');
@@ -24,17 +22,17 @@
           method: 'POST',
           headers: {'X-CSRF-Token': Craft.csrfTokenValue, 'Accept': 'application/json'}
         });
-        if (res.ok) {
+        const json = await res.json().catch(() => ({}));
+        if (res.ok && json.ok) {
           Craft.cp.displayNotice('Queued ALT generation for all images.');
         } else {
-          Craft.cp.displayError('Failed to queue ALT generation.');
+          Craft.cp.displayError(json.error || 'Failed to queue ALT generation.');
         }
       } catch (e) {
         Craft.cp.displayError('Network error.');
       }
     });
 
-    // Place in header actions area
     const actions = header.querySelector('.flex .btngroup') || header.querySelector('.btngroup') || header;
     actions.appendChild(btn);
   }

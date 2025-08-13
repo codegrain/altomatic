@@ -23,7 +23,6 @@ class GenerateController extends Controller
             throw new BadRequestHttpException('Asset not found.');
         }
 
-        // Config guard
         $errors = [];
         if (!Altomatic::$plugin->altomaticService->isConfigured($errors)) {
             Craft::$app->getSession()->setError('Altomatic is not configured: ' . implode(' ', $errors));
@@ -36,7 +35,7 @@ class GenerateController extends Controller
         ]));
 
         Altomatic::$plugin->altomaticService->logAction('queue-asset', $asset->id, 1);
-        Craft::$app->getSession()->setNotice('Queued ALT generation.');
+        Craft::$app->getSession()->setNotice('Queued ALT generation (will populate the asset’s Alternative Text).');
         return $this->redirect($asset->getCpEditUrl() ?? '/admin/assets');
     }
 
@@ -54,7 +53,6 @@ class GenerateController extends Controller
             throw new BadRequestHttpException('Asset not found.');
         }
 
-        // Config guard
         $errors = [];
         if (!Altomatic::$plugin->altomaticService->isConfigured($errors)) {
             Craft::$app->getSession()->setError('Altomatic is not configured: ' . implode(' ', $errors));
@@ -67,7 +65,7 @@ class GenerateController extends Controller
         ]));
 
         Altomatic::$plugin->altomaticService->logAction('queue-asset', $asset->id, 1);
-        Craft::$app->getSession()->setNotice('Queued ALT generation.');
+        Craft::$app->getSession()->setNotice('Queued ALT generation (will populate the asset’s Alternative Text).');
         return $this->redirectToPostedUrl($asset) ?: $this->redirect($asset->getCpEditUrl() ?? '/admin/assets');
     }
 
@@ -75,7 +73,6 @@ class GenerateController extends Controller
     {
         $this->requirePermission('altomatic:generate');
 
-        // Config guard
         $errors = [];
         if (!Altomatic::$plugin->altomaticService->isConfigured($errors)) {
             Craft::$app->getResponse()->format = Response::FORMAT_JSON;
