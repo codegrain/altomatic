@@ -1,4 +1,3 @@
-{# templates/settings.twig #}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 {% set title = title ?? "Altomatic Settings" %}
@@ -23,21 +22,12 @@
     instructions: 'Choose the service to generate ALT text.'
   }) }}
 
-  {{ forms.selectField({
-    label: "Target field"|t,
-    id: 'targetFieldHandle',
-    name: 'targetFieldHandle',
-    options: fieldOptions,
-    value: settings.targetFieldHandle,
-    instructions: 'Where to store the generated ALT. Select a Plain Text field or "Use Asset Title".'
-  }) }}
-
   {{ forms.lightswitchField({
     label: "Overwrite existing values"|t,
     id: 'overwriteExisting',
     name: 'overwriteExisting',
     on: settings.overwriteExisting,
-    instructions: 'If enabled, Altomatic will replace non-empty values.'
+    instructions: 'If enabled, Altomatic will replace non-empty Alternative Text.'
   }) }}
 
   <hr>
@@ -119,16 +109,6 @@
     <a class="btn" href="{{ cpUrl('altomatic/dashboard') }}">Open Dashboard</a>
   </div>
 </form>
-
-<hr>
-
-{% if currentUser.can('altomatic:generate') %}
-<form method="post" accept-charset="UTF-8" class="mt-4">
-  {{ csrfInput() }}
-  {{ actionInput('altomatic/generate/queue-all') }}
-  <button class="btn">Generate ALT for All Images</button>
-</form>
-{% endif %}
 
 {% js %}
 (function(){

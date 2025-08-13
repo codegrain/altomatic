@@ -13,15 +13,12 @@ use altomatic\providers\AzureVisionProvider;
 
 class AltomaticService extends Component
 {
-    // --- Public API ----------------------------------------------------------
-
     public function generateForAsset(Asset $asset): ?string
     {
         if ($asset->kind !== Asset::KIND_IMAGE) {
             return null;
         }
 
-        // If not configured, bail early (extra safety)
         $errors = [];
         if (!$this->isConfigured($errors)) {
             Craft::warning('Altomatic not configured: ' . implode('; ', $errors), __METHOD__);
@@ -30,11 +27,9 @@ class AltomaticService extends Component
 
         $settings = Altomatic::$plugin->getSettings();
 
-        $currentVal = $settings->targetFieldHandle === 'title'
-            ? $asset->title
-            : $asset->getFieldValue($settings->targetFieldHandle);
-
-        if (!$settings->overwriteExisting && !empty($currentVal)) {
+        // always use native alt
+        $currentVal = (string)$asset->alt;
+        if (!$settings->overwriteExisting && trim($currentVal) !== '') {
             return null;
         }
 
@@ -50,14 +45,8 @@ class AltomaticService extends Component
             return null;
         }
 
-        // Truncate to a reasonable ALT length
         $alt = trim(mb_substr($alt, 0, 180));
-
-        if ($settings->targetFieldHandle === 'title') {
-            $asset->title = $alt;
-        } else {
-            $asset->setFieldValue($settings->targetFieldHandle, $alt);
-        }
+        $asset->alt = $alt;
 
         Craft::$app->getElements()->saveElement($asset, true, true, false);
         return $alt;
@@ -65,8 +54,8 @@ class AltomaticService extends Component
 
     public function getProvider(): ProviderInterface
     {
-        $settings = Altomatic::$plugin->getSettings();
-        return match ($settings->provider) {
+        $s = Altomatic::$plugin->getSettings();
+        return match ($s->provider) {
             'google' => new GoogleVisionProvider(),
             'aws'    => new AwsRekognitionProvider(),
             'azure'  => new AzureVisionProvider(),
@@ -74,26 +63,21 @@ class AltomaticService extends Component
         };
     }
 
-    /** Validate configuration for the selected provider. */
     public function isConfigured(?array &$errors = null): bool
     {
         $errors = $errors ?? [];
         $s = Altomatic::$plugin->getSettings();
 
-        if (!$s->targetFieldHandle) {
-            $errors[] = 'Target field is not selected.';
-        }
-
         switch ($s->provider) {
             case 'google':
                 $key = $s->googleApiKey ?: getenv('ALTOMATIC_GOOGLE_API_KEY');
-                if (!$key) $errors[] = 'Google API Key is missing (set in settings or ALTOMATIC_GOOGLE_API_KEY).';
+                if (!$key) $errors[] = 'Google API Key is missing (ALTOMATIC_GOOGLE_API_KEY).';
                 break;
             case 'aws':
                 $key = $s->awsKey ?: getenv('ALTOMATIC_AWS_KEY');
                 $sec = $s->awsSecret ?: getenv('ALTOMATIC_AWS_SECRET');
-                $reg = $s->awsRegion ?: getenv('ALTOMATIC_AWS_REGION');
-                if (!$key || !$sec) $errors[] = 'AWS credentials are missing (AWS Key/Secret).';
+                $reg = $s->awsRegion ?: getenv('ALTOMATIC_AWS_REGION') ?: $s->awsRegion;
+                if (!$key || !$sec) $errors[] = 'AWS credentials are missing.';
                 if (!$reg) $errors[] = 'AWS region is missing.';
                 break;
             case 'azure':
@@ -101,22 +85,19 @@ class AltomaticService extends Component
                 $key = $s->azureKey ?: getenv('ALTOMATIC_AZURE_KEY');
                 if (!$ep || !$key) $errors[] = 'Azure endpoint/key are missing.';
                 break;
-            default: // openai
+            default:
                 $key = $s->openAiApiKey ?: getenv('ALTOMATIC_OPENAI_API_KEY');
-                if (!$key) $errors[] = 'OpenAI API Key is missing (set in settings or ALTOMATIC_OPENAI_API_KEY).';
+                if (!$key) $errors[] = 'OpenAI API Key is missing (ALTOMATIC_OPENAI_API_KEY).';
                 break;
         }
 
         return empty($errors);
     }
 
-    /** Quick stats for dashboard. */
     public function getStats(): array
     {
-        $s = Altomatic::$plugin->getSettings();
         $total = Asset::find()->kind('image')->status(null)->count();
 
-        // Count with ALT
         $with = 0;
         if ($total > 0) {
             $ids = Asset::find()->kind('image')->status(null)->ids();
@@ -124,22 +105,13 @@ class AltomaticService extends Component
                 /** @var ?Asset $a */
                 $a = Craft::$app->getElements()->getElementById($id, Asset::class);
                 if (!$a) continue;
-
-                $val = ($s->targetFieldHandle === 'title')
-                    ? (string)$a->title
-                    : (string)$a->getFieldValue($s->targetFieldHandle);
-
-                if (trim($val) !== '') {
-                    $with++;
-                }
+                if (trim((string)$a->alt) !== '') $with++;
             }
         }
-
         $without = max(0, $total - $with);
         return ['total' => $total, 'withAlt' => $with, 'withoutAlt' => $without];
     }
 
-    /** Lightweight action log. */
     public function logAction(string $action, ?int $assetId = null, ?int $count = null, ?string $notes = null): void
     {
         try {
@@ -158,7 +130,6 @@ class AltomaticService extends Component
         }
     }
 
-    /** Recent logs for dashboard. */
     public function getRecentLogs(int $limit = 50): array
     {
         try {
@@ -174,14 +145,12 @@ class AltomaticService extends Component
         }
     }
 
-    /** Ensure log table exists (very small, plugin-scoped). */
     public function ensureLogTable(): void
     {
         $db = Craft::$app->getDb();
         $schema = $db->getSchema()->getTableSchema('{{%altomatic_log}}', true);
-        if ($schema) {
-            return;
-        }
+        if ($schema) return;
+
         $db->createCommand()->createTable('{{%altomatic_log}}', [
             'id'        => $db->getSchema()->createColumnSchemaBuilder('pk'),
             'userId'    => $db->getSchema()->createColumnSchemaBuilder('integer')->null(),
@@ -194,8 +163,6 @@ class AltomaticService extends Component
         $db->createCommand()->createIndex(null, '{{%altomatic_log}}', ['createdAt'])->execute();
         $db->createCommand()->createIndex(null, '{{%altomatic_log}}', ['assetId'])->execute();
     }
-
-    // --- Internals -----------------------------------------------------------
 
     private function getLocalFilePath(Asset $asset): ?string
     {

@@ -39,8 +39,9 @@ class Altomatic extends Plugin
 
         // routes
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
-            $event->rules['altomatic'] = 'altomatic/dashboard/index';                    // NEW: default to dashboard
-            $event->rules['altomatic/dashboard'] = 'altomatic/dashboard/index';          // NEW: dashboard
+            $event->rules['altomatic'] = 'altomatic/dashboard/index';
+            $event->rules['altomatic/dashboard'] = 'altomatic/dashboard/index';
+            $event->rules['altomatic/settings'] = 'altomatic/dashboard/settings';
             $event->rules['altomatic/generate/asset/<assetId:\d+>'] = 'altomatic/generate/generate-for-asset';
             $event->rules['altomatic/generate/asset'] = 'altomatic/generate/generate-for-asset';
             $event->rules['altomatic/generate/queue-all'] = 'altomatic/generate/queue-all';
@@ -59,7 +60,7 @@ class Altomatic extends Plugin
             $event->actions[] = GenerateAltForAssets::class;
         });
 
-        // per-asset sidebar section (nicer UI + config guard)
+        // per-asset sidebar section
         Event::on(Asset::class, Element::EVENT_DEFINE_SIDEBAR_HTML, static function (DefineHtmlEvent $event) {
             if (!Craft::$app->getUser()->checkPermission('altomatic:generate')) {
                 return;
@@ -74,14 +75,8 @@ class Altomatic extends Plugin
             $isConfigured = $service->isConfigured($errors);
 
             $dashboardUrl = UrlHelper::cpUrl('altomatic/dashboard');
-            $settingsUrl  = UrlHelper::cpUrl('settings/plugins/altomatic');
+            $settingsUrl  = UrlHelper::cpUrl('altomatic/settings');
 
-            // Container panel styled to match CP meta blocks
-            $html = '<div class="meta">';
-            $html .= '<div class="field">';
-            $html .= '<div class="heading"><label>Altomatic</label></div>';
-
-            // Small status line
             $settings = Altomatic::$plugin->getSettings();
             $providerLabel = [
                 'openai' => 'OpenAI',
@@ -90,11 +85,10 @@ class Altomatic extends Plugin
                 'azure'  => 'Azure Vision',
             ][$settings->provider ?? 'openai'] ?? 'OpenAI';
 
-            $target = $settings->targetFieldHandle ?: 'title';
-            $html .= '<div class="instructions"><p>Provider: <strong>' . HtmlHelper::encode($providerLabel) . '</strong> &nbsp;•&nbsp; Target: <code>' . HtmlHelper::encode($target) . '</code></p></div>';
+            $html = '<div class="meta"><div class="field"><div class="heading"><label>Altomatic</label></div>';
+            $html .= '<div class="instructions"><p>Provider: <strong>' . HtmlHelper::encode($providerLabel) . '</strong> • Target: <code>alt</code></p></div>';
 
             if ($isConfigured) {
-                // Pretty primary button + helper links
                 $postUrl  = UrlHelper::actionUrl('altomatic/generate/queue-asset');
                 $redirect = $asset->getCpEditUrl();
                 $signedRedirect = Craft::$app->getSecurity()->hashData($redirect);
@@ -108,22 +102,18 @@ class Altomatic extends Plugin
                 $form .= HtmlHelper::endForm();
 
                 $html .= $form;
-                $html .= '<p class="light mt-1" style="margin-top:6px"><a href="' . HtmlHelper::encode($dashboardUrl) . '">Open Altomatic Dashboard</a></p>';
+                $html .= '<p class="light" style="margin-top:6px"><a href="' . HtmlHelper::encode($dashboardUrl) . '">Open Altomatic Dashboard</a> • <a href="' . HtmlHelper::encode($settingsUrl) . '">Settings</a></p>';
             } else {
-                // Config warning with quick links
                 $html .= '<div class="warning" style="margin-top:6px"><p><strong>Altomatic is not configured.</strong></p>';
                 if ($errors) {
                     $html .= '<ul class="errors" style="margin:6px 0 0 1em;">';
-                    foreach ($errors as $e) {
-                        $html .= '<li>' . HtmlHelper::encode($e) . '</li>';
-                    }
+                    foreach ($errors as $e) $html .= '<li>' . HtmlHelper::encode($e) . '</li>';
                     $html .= '</ul>';
                 }
-                $html .= '<p class="light" style="margin-top:6px"><a href="' . HtmlHelper::encode($settingsUrl) . '">Configure in Settings</a> &nbsp;•&nbsp; <a href="' . HtmlHelper::encode($dashboardUrl) . '">View Dashboard</a></p>';
-                $html .= '</div>';
+                $html .= '<p class="light" style="margin-top:6px"><a href="' . HtmlHelper::encode($settingsUrl) . '">Configure in Settings</a> • <a href="' . HtmlHelper::encode($dashboardUrl) . '">View Dashboard</a></p></div>';
             }
 
-            $html .= '</div></div>'; // field/meta
+            $html .= '</div></div>';
             $event->html .= $html;
         });
 
@@ -131,7 +121,7 @@ class Altomatic extends Plugin
             Craft::$app->getView()->registerAssetBundle(CpAssetBundle::class);
         }
 
-        // Ensure the lightweight log table exists
+        // make sure log table exists
         try {
             $this->getAltomaticService()->ensureLogTable();
         } catch (\Throwable $e) {
@@ -139,12 +129,16 @@ class Altomatic extends Plugin
         }
     }
 
-    // Small CP nav so the dashboard is easy to find
+    // Top-level nav with subnav
     public function getCpNavItem(): ?array
     {
         $item = parent::getCpNavItem();
         $item['label'] = 'Altomatic';
-        $item['url'] = 'altomatic';
+        $item['url'] = 'altomatic/dashboard';
+        $item['subnav'] = [
+            'dashboard' => ['label' => 'Dashboard', 'url' => 'altomatic/dashboard'],
+            'settings'  => ['label' => 'Settings',  'url' => 'altomatic/settings'],
+        ];
         return $item;
     }
 
@@ -155,23 +149,14 @@ class Altomatic extends Plugin
 
     public function getSettingsResponse(): mixed
     {
+        // keep plugin settings page functional, but primary entry is our own nav item
         $this->requireAdminOrPermission('altomatic:settings');
 
-        $fieldsService = Craft::$app->getFields();
-        $fieldOptions = [
-            ['label' => '— Select field —', 'value' => ''],
-            ['label' => 'Use Asset Title', 'value' => 'title'],
-        ];
-        
-        foreach ($fieldsService->getAllFields() as $field) {
-            if ($field instanceof \craft\fields\PlainText) {
-                $fieldOptions[] = ['label' => $field->name . ' (' . $field->handle . ')', 'value' => $field->handle];
-            }
-        }
+        $fieldsService = Craft::$app->getFields(); // left intact in case you reintroduce fields later
 
         return Craft::$app->controller->renderTemplate('altomatic/settings', [
             'settings' => $this->getSettings(),
-            'fieldOptions' => $fieldOptions,
+            'fieldOptions' => [],  // target field removed
             'title' => 'Altomatic Settings',
         ]);
     }

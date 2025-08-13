@@ -7,7 +7,6 @@ use craft\base\Model;
 class Settings extends Model
 {
     public ?string $provider = 'openai'; // openai|google|aws|azure
-    public ?string $targetFieldHandle = 'title'; // PlainText handle or 'title'
     public bool $overwriteExisting = false;
 
     // OpenAI
@@ -29,7 +28,7 @@ class Settings extends Model
     public function rules(): array
     {
         return [
-            [['provider', 'targetFieldHandle'], 'string'],
+            [['provider'], 'string'],
             [['overwriteExisting'], 'boolean'],
             [['openAiApiKey', 'openAiModel', 'googleApiKey', 'awsKey', 'awsSecret', 'awsRegion', 'azureEndpoint', 'azureKey'], 'safe'],
         ];
@@ -39,7 +38,6 @@ class Settings extends Model
     {
         return [
             'provider' => Craft::t('app', 'Provider'),
-            'targetFieldHandle' => Craft::t('app', 'Target Field'),
             'overwriteExisting' => Craft::t('app', 'Overwrite existing values'),
         ];
     }
