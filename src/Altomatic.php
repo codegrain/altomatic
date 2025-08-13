@@ -90,23 +90,19 @@ class Altomatic extends Plugin
             ['label' => '— Select field —', 'value' => ''],
             ['label' => 'Use Asset Title', 'value' => 'title'],
         ];
-
-        // Collect PlainText fields used in any Asset field layout (across volumes)
-        // (Simple approach: list all PlainText fields globally.)
         foreach ($fieldsService->getAllFields() as $field) {
             if ($field instanceof \craft\fields\PlainText) {
-                $fieldOptions[] = [
-                    'label' => $field->name . ' (' . $field->handle . ')',
-                    'value' => $field->handle,
-                ];
+                $fieldOptions[] = ['label' => $field->name . ' (' . $field->handle . ')', 'value' => $field->handle];
             }
         }
 
-        return Craft::$app->getView()->renderTemplate('altomatic/settings', [
+        return Craft::$app->controller->renderTemplate('altomatic/settings', [
             'settings' => $this->getSettings(),
             'fieldOptions' => $fieldOptions,
+            'title' => 'Altomatic Settings',
         ]);
     }
+
 
     private function requireAdminOrPermission(string $permission): void
     {
