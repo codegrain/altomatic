@@ -10,6 +10,7 @@ use craft\events\RegisterElementActionsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\UrlHelper;
+use craft\helpers\Html as HtmlHelper; // added
 use craft\services\UserPermissions;
 use craft\web\UrlManager;
 use yii\base\Event;
@@ -65,9 +66,22 @@ class Altomatic extends Plugin
             if (!$asset instanceof Asset || !$asset->id || $asset->kind !== Asset::KIND_IMAGE) {
                 return;
             }
-            $url = UrlHelper::cpUrl('altomatic/generate/asset/'.$asset->id);
-            $event->html .= '<div class="meta"><a class="btn submit fullwidth" href="'.$url.'">' .
-                Craft::t('app', 'Generate ALT with Altomatic') . '</a></div>';
+
+            // POST action with CSRF + **signed** redirect to avoid 400
+            $postUrl  = UrlHelper::actionUrl('altomatic/generate/queue-asset');
+            $redirect = $asset->getCpEditUrl();
+            $signedRedirect = Craft::$app->getSecurity()->hashData($redirect); // <-- signed
+
+            $label = Craft::t('app', 'Generate ALT with Altomatic');
+
+            $form  = HtmlHelper::beginForm($postUrl, 'post');
+            $form .= HtmlHelper::csrfInput();
+            $form .= HtmlHelper::hiddenInput('assetId', (string)$asset->id);
+            $form .= HtmlHelper::hiddenInput('redirect', $signedRedirect); // <-- use signed value
+            $form .= HtmlHelper::tag('button', $label, ['class' => 'btn fullwidth']); // keep style neutral
+            $form .= HtmlHelper::endForm();
+
+            $event->html .= HtmlHelper::tag('div', $form, ['class' => 'meta']);
         });
 
         if (Craft::$app->getRequest()->getIsCpRequest()) {
@@ -89,7 +103,7 @@ class Altomatic extends Plugin
             ['label' => '— Select field —', 'value' => ''],
             ['label' => 'Use Asset Title', 'value' => 'title'],
         ];
-        
+
         foreach ($fieldsService->getAllFields() as $field) {
             if ($field instanceof \craft\fields\PlainText) {
                 $fieldOptions[] = ['label' => $field->name . ' (' . $field->handle . ')', 'value' => $field->handle];
@@ -102,7 +116,6 @@ class Altomatic extends Plugin
             'title' => 'Altomatic Settings',
         ]);
     }
-
 
     private function requireAdminOrPermission(string $permission): void
     {
