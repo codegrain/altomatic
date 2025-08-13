@@ -3,7 +3,7 @@
   "description": "Altomatic — AI ALT text generator for Craft CMS 5 Assets.",
   "type": "craft-plugin",
   "version": "1.0.0",
-  "license": "",
+  "license": "proprietary",
   "keywords": ["craftcms", "assets", "alt text", "seo", "accessibility", "ai"],
   "require": {
     "php": "^8.2",
