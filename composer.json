@@ -1,0 +1,28 @@
+{
+  "name": "altomatic/altomatic",
+  "description": "Altomatic — AI ALT text generator for Craft CMS 5 Assets.",
+  "type": "craft-plugin",
+  "version": "1.0.0",
+  "license": "",
+  "keywords": ["craftcms", "assets", "alt text", "seo", "accessibility", "ai"],
+  "require": {
+    "php": "^8.2",
+    "craftcms/cms": "^5.0",
+    "guzzlehttp/guzzle": "^7.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "altomatic\\": "src/"
+    }
+  },
+  "extra": {
+    "craft-plugin": {
+      "name": "Altomatic",
+      "handle": "altomatic",
+      "class": "altomatic\\Altomatic",
+      "schemaVersion": "1.0.0",
+      "hasCpSettings": true,
+      "hasCpSection": false
+    }
+  }
+}
