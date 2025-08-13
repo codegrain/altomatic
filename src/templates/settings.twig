@@ -9,8 +9,6 @@
   {{ actionInput('plugins/save-plugin-settings') }}
   {{ hiddenInput('pluginHandle', 'altomatic') }}
 
-  {# <h2>Altomatic Settings</h2> #}
-
   {{ forms.selectField({
     label: "Provider"|t,
     id: 'provider',
@@ -118,6 +116,7 @@
 
   <div class="buttons">
     <button type="submit" class="btn submit">Save settings</button>
+    <a class="btn" href="{{ cpUrl('altomatic/dashboard') }}">Open Dashboard</a>
   </div>
 </form>
 
