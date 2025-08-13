@@ -26,6 +26,7 @@ use altomatic\services\AltomaticService;
 class Altomatic extends Plugin
 {
     public bool $hasCpSettings = true;
+    public bool $hasCpSection  = true;
     public static Altomatic $plugin;
 
     public function init(): void
@@ -134,7 +135,7 @@ class Altomatic extends Plugin
     {
         $item = parent::getCpNavItem();
         $item['label'] = 'Altomatic';
-        $item['url'] = 'altomatic/dashboard';
+        $item['url']   = 'altomatic';
         $item['subnav'] = [
             'dashboard' => ['label' => 'Dashboard', 'url' => 'altomatic/dashboard'],
             'settings'  => ['label' => 'Settings',  'url' => 'altomatic/settings'],
@@ -149,14 +150,10 @@ class Altomatic extends Plugin
 
     public function getSettingsResponse(): mixed
     {
-        // keep plugin settings page functional, but primary entry is our own nav item
         $this->requireAdminOrPermission('altomatic:settings');
-
-        $fieldsService = Craft::$app->getFields(); // left intact in case you reintroduce fields later
-
         return Craft::$app->controller->renderTemplate('altomatic/settings', [
             'settings' => $this->getSettings(),
-            'fieldOptions' => [],  // target field removed
+            'fieldOptions' => [],
             'title' => 'Altomatic Settings',
         ]);
     }
