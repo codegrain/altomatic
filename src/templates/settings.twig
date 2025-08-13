@@ -1,0 +1,145 @@
+{% import "_includes/forms" as forms %}
+
+<form method="post" accept-charset="UTF-8">
+  {{ csrfInput() }}
+  {{ actionInput('plugins/save-plugin-settings') }}
+  {{ hiddenInput('pluginHandle', 'altomatic') }}
+
+  <h2>Altomatic Settings</h2>
+
+  {{ forms.selectField({
+    label: "Provider"|t,
+    id: 'provider',
+    name: 'provider',
+    options: [
+      {label: 'OpenAI', value: 'openai'},
+      {label: 'Google Vision', value: 'google'},
+      {label: 'AWS Rekognition', value: 'aws'},
+      {label: 'Azure Vision', value: 'azure'},
+    ],
+    value: settings.provider,
+    instructions: 'Choose the service to generate ALT text.'
+  }) }}
+
+  {{ forms.selectField({
+    label: "Target field"|t,
+    id: 'targetFieldHandle',
+    name: 'targetFieldHandle',
+    options: fieldOptions,
+    value: settings.targetFieldHandle,
+    instructions: 'Where to store the generated ALT. Select a Plain Text field or "Use Asset Title".'
+  }) }}
+
+  {{ forms.lightswitchField({
+    label: "Overwrite existing values"|t,
+    id: 'overwriteExisting',
+    name: 'overwriteExisting',
+    on: settings.overwriteExisting,
+    instructions: 'If enabled, Altomatic will replace non-empty values.'
+  }) }}
+
+  <hr>
+
+  <div id="provider-openai" class="provider-group">
+    {{ forms.autosuggestField({
+      label: "OpenAI API Key"|t,
+      id: 'openAiApiKey',
+      name: 'openAiApiKey',
+      value: settings.openAiApiKey,
+      suggestEnvVars: true,
+      placeholder: 'ALTOMATIC_OPENAI_API_KEY',
+    }) }}
+
+    {{ forms.textField({
+      label: "OpenAI Model"|t,
+      id: 'openAiModel',
+      name: 'openAiModel',
+      value: settings.openAiModel ?? 'gpt-4o-mini',
+    }) }}
+  </div>
+
+  <div id="provider-google" class="provider-group">
+    {{ forms.autosuggestField({
+      label: "Google API Key"|t,
+      id: 'googleApiKey',
+      name: 'googleApiKey',
+      value: settings.googleApiKey,
+      suggestEnvVars: true,
+      placeholder: 'ALTOMATIC_GOOGLE_API_KEY',
+    }) }}
+  </div>
+
+  <div id="provider-aws" class="provider-group">
+    {{ forms.autosuggestField({
+      label: "AWS Access Key ID"|t,
+      id: 'awsKey',
+      name: 'awsKey',
+      value: settings.awsKey,
+      suggestEnvVars: true,
+      placeholder: 'ALTOMATIC_AWS_KEY',
+    }) }}
+    {{ forms.autosuggestField({
+      label: "AWS Secret Access Key"|t,
+      id: 'awsSecret',
+      name: 'awsSecret',
+      value: settings.awsSecret,
+      suggestEnvVars: true,
+      placeholder: 'ALTOMATIC_AWS_SECRET',
+    }) }}
+    {{ forms.textField({
+      label: "AWS Region"|t,
+      id: 'awsRegion',
+      name: 'awsRegion',
+      value: settings.awsRegion ?? 'us-east-1',
+    }) }}
+  </div>
+
+  <div id="provider-azure" class="provider-group">
+    {{ forms.autosuggestField({
+      label: "Azure Endpoint"|t,
+      id: 'azureEndpoint',
+      name: 'azureEndpoint',
+      value: settings.azureEndpoint,
+      suggestEnvVars: true,
+      placeholder: 'ALTOMATIC_AZURE_ENDPOINT',
+    }) }}
+    {{ forms.autosuggestField({
+      label: "Azure Key"|t,
+      id: 'azureKey',
+      name: 'azureKey',
+      value: settings.azureKey,
+      suggestEnvVars: true,
+      placeholder: 'ALTOMATIC_AZURE_KEY',
+    }) }}
+  </div>
+
+  <div class="buttons">
+    <button type="submit" class="btn submit">Save settings</button>
+  </div>
+</form>
+
+<hr>
+
+<form method="post" accept-charset="UTF-8" class="mt-4">
+  {{ csrfInput() }}
+  <input type="hidden" name="action" value="altomatic/generate/queue-all">
+  <button class="btn">Generate ALT for All Images</button>
+</form>
+
+{% js %}
+(function(){
+  function syncVisibility() {
+    var provider = document.getElementById('provider').value;
+    ['openai','google','aws','azure'].forEach(function(p) {
+      var el = document.getElementById('provider-' + p);
+      if (el) el.style.display = (p === provider) ? '' : 'none';
+    });
+  }
+  document.getElementById('provider').addEventListener('change', syncVisibility);
+  syncVisibility();
+})();
+{% endjs %}
+
+<style>
+  .provider-group { margin: 1rem 0; }
+</style>
