@@ -16,13 +16,12 @@
     }
   },
   "extra": {
-    "craft-plugin": {
-      "name": "Altomatic",
-      "handle": "altomatic",
-      "class": "altomatic\\Altomatic",
-      "schemaVersion": "1.0.0",
-      "hasCpSettings": true,
-      "hasCpSection": false
-    }
+    "name": "Altomatic",
+    "handle": "altomatic",
+    "class": "altomatic\\Altomatic",
+    "description": "Altomatic — AI ALT text generator for Craft CMS 5 Assets.",
+    "schemaVersion": "1.0.0",
+    "hasCpSettings": true,
+    "hasCpSection": false
   }
 }
