@@ -5,7 +5,8 @@ use Craft;
 use craft\base\Element;
 use craft\base\Plugin;
 use craft\elements\Asset;
-use craft\events\DefineElementEditorSidebarHtmlEvent;
+use craft\events\DefineHtmlEvent;
+use craft\helpers\UrlHelper;
 use craft\events\RegisterElementActionsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\UserPermissions;
@@ -53,19 +54,26 @@ class Altomatic extends Plugin
         );
 
         // Add a sidebar button on each Asset edit page
-        Event::on(Asset::class, Element::EVENT_DEFINE_SIDEBAR_HTML,
-            function (DefineElementEditorSidebarHtmlEvent $event) {
+        Event::on(
+            Asset::class,
+            Element::EVENT_DEFINE_SIDEBAR_HTML,
+            function (DefineHtmlEvent $event) {
                 if (!Craft::$app->getUser()->checkPermission('altomatic:generate')) {
                     return;
                 }
-                /** @var Asset $asset */
+
                 $asset = $event->sender;
-                if (!$asset->getId() || !$asset->kind || $asset->kind !== Asset::KIND_IMAGE) {
+                if (!$asset instanceof Asset) {
                     return;
                 }
-                $url = Craft::$app->getUrlManager()->createUrl(['altomatic/generate/asset', 'assetId' => $asset->id]);
+                if (!$asset->id || $asset->kind !== Asset::KIND_IMAGE) {
+                    return;
+                }
+
+                $url = UrlHelper::cpUrl('altomatic/generate/asset', ['assetId' => $asset->id]);
                 $btn = '<div class="meta"><a class="btn submit fullwidth" href="'.$url.'">' .
                     Craft::t('app', 'Generate ALT with Altomatic') . '</a></div>';
+
                 $event->html .= $btn;
             }
         );
