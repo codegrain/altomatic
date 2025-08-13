@@ -2,7 +2,7 @@
   "name": "codegrain/altomatic",
   "description": "Altomatic — AI ALT text generator for Craft CMS 5 Assets.",
   "type": "craft-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "proprietary",
   "keywords": ["craftcms", "assets", "alt text", "seo", "accessibility", "ai"],
   "require": {

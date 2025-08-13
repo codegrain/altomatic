@@ -1,0 +1,7 @@
+/.github export-ignore
+/tests export-ignore
+/.idea export-ignore
+/.vscode export-ignore
+/.gitignore export-ignore
+/CHANGELOG.md export-ignore
+/README.md export-ignore
