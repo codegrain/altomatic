@@ -15,7 +15,7 @@ class GenerateAltJob extends BaseJob
     {
         $total = count($this->assetIds);
         foreach ($this->assetIds as $i => $id) {
-            $this->setProgress($queue, $i / max(1, $total));
+            $this->setProgress($queue, ($i + 1) / max(1, $total));
             /** @var ?Asset $asset */
             $asset = Craft::$app->getElements()->getElementById($id, Asset::class);
             if (!$asset || $asset->kind !== Asset::KIND_IMAGE) {

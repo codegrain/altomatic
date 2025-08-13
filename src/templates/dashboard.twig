@@ -1,0 +1,54 @@
+{% extends "_layouts/cp" %}
+{% set title = title ?? "Altomatic Dashboard" %}
+
+{% block content %}
+  <div class="pane">
+    <h2 style="margin-top:0;">Overview</h2>
+    <div class="flex" style="gap:16px; flex-wrap:wrap;">
+      <div class="pane" style="flex:1; min-width:220px; margin-block: 0;">
+        <h3>Total Images</h3>
+        <p style="font-size:24px; font-weight:600;">{{ stats.total }}</p>
+      </div>
+      <div class="pane" style="flex:1; min-width:220px; margin-block: 0;">
+        <h3>With ALT</h3>
+        <p style="font-size:24px; font-weight:600;">{{ stats.withAlt }}</p>
+      </div>
+      <div class="pane" style="flex:1; min-width:220px; margin-block: 0;">
+        <h3>Without ALT</h3>
+        <p style="font-size:24px; font-weight:600;">{{ stats.withoutAlt }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane" style="margin-top:20px;">
+    <h2 style="margin-top:0;">Recent Actions</h2>
+    {% if logs|length %}
+      <table class="data fullwidth">
+        <thead>
+          <tr>
+            <th style="width:120px;">When</th>
+            <th>User</th>
+            <th>Action</th>
+            <th style="width:100px;">Asset ID</th>
+            <th style="width:100px;">Count</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for r in logs %}
+          <tr>
+            <td>{{ r.createdAt|datetime('short') }}</td>
+            <td>{{ r.username ?? r.email ?? '—' }}</td>
+            <td>{{ r.action }}</td>
+            <td>{{ r.assetId ?: '—' }}</td>
+            <td>{{ r.count ?: '—' }}</td>
+            <td>{{ r.notes ?: '—' }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="light">No actions logged yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}

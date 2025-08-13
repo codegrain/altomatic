@@ -29,6 +29,7 @@ class GenerateAltForAssets extends ElementAction
             'description' => 'Altomatic: Generate ALT for selection',
         ]));
 
+        Altomatic::$plugin->altomaticService->logAction('queue-selected', null, count($ids));
         $this->setMessage('Queued ALT generation for selected assets.');
         return true;
     }
