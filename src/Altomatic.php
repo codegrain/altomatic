@@ -105,7 +105,7 @@ class Altomatic extends Plugin
                 $html .= $form;
                 $html .= '<p class="light" style="margin-top:6px"><a href="' . HtmlHelper::encode($dashboardUrl) . '">Open Altomatic Dashboard</a> • <a href="' . HtmlHelper::encode($settingsUrl) . '">Settings</a></p>';
             } else {
-                $html .= '<div class="warning" style="margin-top:6px"><p><strong>Altomatic is not configured.</strong></p>';
+                $html .= '<div class="warning" style="margin-top:0;padding:1rem;border-top:1px solid var(--border-hairline);"><p><strong>Altomatic is not configured.</strong></p>';
                 if ($errors) {
                     $html .= '<ul class="errors" style="margin:6px 0 0 1em;">';
                     foreach ($errors as $e) $html .= '<li>' . HtmlHelper::encode($e) . '</li>';
