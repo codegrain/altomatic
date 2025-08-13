@@ -2,7 +2,7 @@
   "name": "codegrain/altomatic",
   "description": "Automatically generate AI-powered ALT text for Craft CMS",
   "type": "craft-plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "proprietary",
   "keywords": ["craftcms", "assets", "alt text", "seo", "accessibility", "ai"],
   "require": {
@@ -22,6 +22,6 @@
     "description": "Automatically generate AI-powered ALT text for Craft CMS",
     "schemaVersion": "1.0.0",
     "hasCpSettings": true,
-    "hasCpSection": false
+    "hasCpSection": true
   }
 }
