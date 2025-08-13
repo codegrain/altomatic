@@ -1,11 +1,15 @@
+{# templates/settings.twig #}
+{% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
+{% set title = title ?? "Altomatic Settings" %}
 
+{% block content %}
 <form method="post" accept-charset="UTF-8">
   {{ csrfInput() }}
   {{ actionInput('plugins/save-plugin-settings') }}
   {{ hiddenInput('pluginHandle', 'altomatic') }}
 
-  <h2>Altomatic Settings</h2>
+  {# <h2>Altomatic Settings</h2> #}
 
   {{ forms.selectField({
     label: "Provider"|t,
@@ -49,7 +53,6 @@
       suggestEnvVars: true,
       placeholder: 'ALTOMATIC_OPENAI_API_KEY',
     }) }}
-
     {{ forms.textField({
       label: "OpenAI Model"|t,
       id: 'openAiModel',
@@ -120,11 +123,13 @@
 
 <hr>
 
+{% if currentUser.can('altomatic:generate') %}
 <form method="post" accept-charset="UTF-8" class="mt-4">
   {{ csrfInput() }}
-  <input type="hidden" name="action" value="altomatic/generate/queue-all">
+  {{ actionInput('altomatic/generate/queue-all') }}
   <button class="btn">Generate ALT for All Images</button>
 </form>
+{% endif %}
 
 {% js %}
 (function(){
@@ -140,6 +145,5 @@
 })();
 {% endjs %}
 
-<style>
-  .provider-group { margin: 1rem 0; }
-</style>
+<style>.provider-group{margin:1rem 0}</style>
+{% endblock %}
