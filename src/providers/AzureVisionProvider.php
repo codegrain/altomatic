@@ -5,9 +5,11 @@ use Craft;
 use GuzzleHttp\Client;
 use craft\elements\Asset;
 use altomatic\Altomatic;
+use altomatic\traits\LoggingTrait;
 
 class AzureVisionProvider implements ProviderInterface
 {
+    use LoggingTrait;
     public function generateAlt(Asset $asset, ?string $imageInput): ?string
     {
         $s = Altomatic::$plugin->getSettings();
@@ -37,7 +39,7 @@ class AzureVisionProvider implements ProviderInterface
             $caption = $data['description']['captions'][0]['text'] ?? null;
             return $caption ? mb_substr(trim($caption, " ."), 0, 180) : null;
         } catch (\Throwable $e) {
-            Craft::error('Azure Vision error: ' . $e->getMessage(), __METHOD__);
+            $this->logError('Azure Vision error: ' . $e->getMessage());
             return null;
         }
     }

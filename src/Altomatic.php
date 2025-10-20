@@ -19,12 +19,15 @@ use altomatic\models\Settings;
 use altomatic\assetbundles\cp\CpAssetBundle;
 use altomatic\elements\actions\GenerateAltForAssets;
 use altomatic\services\AltomaticService;
+use altomatic\traits\LoggingTrait;
 
 /**
  * @property-read AltomaticService $altomaticService
  */
 class Altomatic extends Plugin
 {
+    use LoggingTrait;
+    
     public bool $hasCpSettings = true;
     public bool $hasCpSection  = true;
     public static Altomatic $plugin;
@@ -45,6 +48,7 @@ class Altomatic extends Plugin
             $event->rules['altomatic/settings'] = 'altomatic/dashboard/settings';
             $event->rules['altomatic/generate/asset/<assetId:\d+>'] = 'altomatic/generate/generate-for-asset';
             $event->rules['altomatic/generate/asset'] = 'altomatic/generate/generate-for-asset';
+            $event->rules['altomatic/generate/queue-asset'] = 'altomatic/generate/queue-asset';
             $event->rules['altomatic/generate/queue-all'] = 'altomatic/generate/queue-all';
         });
 
@@ -126,7 +130,7 @@ class Altomatic extends Plugin
         try {
             $this->getAltomaticService()->ensureLogTable();
         } catch (\Throwable $e) {
-            Craft::error('Altomatic ensureLogTable error: ' . $e->getMessage(), __METHOD__);
+            $this->logError('Altomatic ensureLogTable error: ' . $e->getMessage());
         }
     }
 
