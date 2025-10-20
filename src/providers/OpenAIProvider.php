@@ -15,12 +15,13 @@ class OpenAIProvider implements ProviderInterface
         $model  = $s->openAiModel ?: 'gpt-4o-mini';
 
         if (!$apiKey || !$imageInput) {
+            Craft::error("OpenAI missing API key or image input. Key: " . ($apiKey ? 'present' : 'missing') . ", Input: " . ($imageInput ? substr($imageInput, 0, 50) : 'missing'), __METHOD__);
             return null;
         }
 
         // If local path, convert to base64 data URL to send inline.
         $imagePayload = str_starts_with((string)$imageInput, 'http')
-            ? ['type' => 'input_image', 'image_url' => ['url' => $imageInput]]
+            ? ['type' => 'image_url', 'image_url' => ['url' => $imageInput]]
             : $this->encodeLocalAsInputImage($imageInput);
 
         $prompt = "Describe this image as concise ALT text (<= 125 characters), no emojis, no prefixes.";
@@ -54,7 +55,11 @@ class OpenAIProvider implements ProviderInterface
             ]);
 
             $body = json_decode((string)$res->getBody(), true);
-            return trim($body['choices'][0]['message']['content'] ?? '') ?: null;
+            $result = trim($body['choices'][0]['message']['content'] ?? '') ?: null;
+            if (!$result) {
+                Craft::error("OpenAI returned empty response: " . json_encode($body), __METHOD__);
+            }
+            return $result;
         } catch (\Throwable $e) {
             Craft::error('OpenAI error: ' . $e->getMessage(), __METHOD__);
             return null;
@@ -64,10 +69,10 @@ class OpenAIProvider implements ProviderInterface
     private function encodeLocalAsInputImage(string $path): array
     {
         if (!is_readable($path)) {
-            return ['type' => 'input_image', 'image_url' => ['url' => '']];
+            return ['type' => 'image_url', 'image_url' => ['url' => '']];
         }
         $bytes = file_get_contents($path);
         $b64 = 'data:image/*;base64,' . base64_encode($bytes);
-        return ['type' => 'input_image', 'image_url' => ['url' => $b64]];
+        return ['type' => 'image_url', 'image_url' => ['url' => $b64]];
     }
 }

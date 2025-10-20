@@ -44,6 +44,7 @@ class GenerateController extends Controller
         $this->requirePostRequest();
         $this->requirePermission('altomatic:generate');
 
+        Craft::error('ALTOMATIC: actionQueueAsset called!', __METHOD__);
         $request = Craft::$app->getRequest();
         $assetId = (int)$request->getRequiredBodyParam('assetId');
 
@@ -65,8 +66,12 @@ class GenerateController extends Controller
         ]));
 
         Altomatic::$plugin->altomaticService->logAction('queue-asset', $asset->id, 1);
-        Craft::$app->getSession()->setNotice('Queued ALT generation (will populate the asset’s Alternative Text).');
-        return $this->redirectToPostedUrl($asset) ?: $this->redirect($asset->getCpEditUrl() ?? '/admin/assets');
+        Craft::$app->getSession()->setNotice('Queued ALT generation (will populate the asset\'s Alternative Text).');
+        $redirect = $request->getBodyParam('redirect');
+        if ($redirect && ($redirectUrl = Craft::$app->getSecurity()->validateData($redirect))) {
+            return $this->redirect($redirectUrl);
+        }
+        return $this->redirect($asset->getCpEditUrl() ?? '/admin/assets');
     }
 
     public function actionQueueAll(): Response

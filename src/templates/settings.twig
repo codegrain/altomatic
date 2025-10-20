@@ -3,6 +3,7 @@
 {% set title = title ?? "Altomatic Settings" %}
 
 {% block content %}
+Hello
 <form method="post" accept-charset="UTF-8">
   {{ csrfInput() }}
   {{ actionInput('plugins/save-plugin-settings') }}
@@ -11,7 +12,7 @@
   {{ forms.selectField({
     label: "Provider"|t,
     id: 'provider',
-    name: 'provider',
+    name: 'settings[provider]',
     options: [
       {label: 'OpenAI', value: 'openai'},
       {label: 'Google Vision', value: 'google'},
@@ -25,7 +26,7 @@
   {{ forms.lightswitchField({
     label: "Overwrite existing values"|t,
     id: 'overwriteExisting',
-    name: 'overwriteExisting',
+    name: 'settings[overwriteExisting]',
     on: settings.overwriteExisting,
     instructions: 'If enabled, Altomatic will replace non-empty Alternative Text.'
   }) }}
@@ -36,7 +37,7 @@
     {{ forms.autosuggestField({
       label: "OpenAI API Key"|t,
       id: 'openAiApiKey',
-      name: 'openAiApiKey',
+      name: 'settings[openAiApiKey]',
       value: settings.openAiApiKey,
       suggestEnvVars: true,
       placeholder: 'ALTOMATIC_OPENAI_API_KEY',
@@ -44,7 +45,7 @@
     {{ forms.textField({
       label: "OpenAI Model"|t,
       id: 'openAiModel',
-      name: 'openAiModel',
+      name: 'settings[openAiModel]',
       value: settings.openAiModel ?? 'gpt-4o-mini',
     }) }}
   </div>
@@ -53,7 +54,7 @@
     {{ forms.autosuggestField({
       label: "Google API Key"|t,
       id: 'googleApiKey',
-      name: 'googleApiKey',
+      name: 'settings[googleApiKey]',
       value: settings.googleApiKey,
       suggestEnvVars: true,
       placeholder: 'ALTOMATIC_GOOGLE_API_KEY',
@@ -64,7 +65,7 @@
     {{ forms.autosuggestField({
       label: "AWS Access Key ID"|t,
       id: 'awsKey',
-      name: 'awsKey',
+      name: 'settings[awsKey]',
       value: settings.awsKey,
       suggestEnvVars: true,
       placeholder: 'ALTOMATIC_AWS_KEY',
@@ -72,7 +73,7 @@
     {{ forms.autosuggestField({
       label: "AWS Secret Access Key"|t,
       id: 'awsSecret',
-      name: 'awsSecret',
+      name: 'settings[awsSecret]',
       value: settings.awsSecret,
       suggestEnvVars: true,
       placeholder: 'ALTOMATIC_AWS_SECRET',
@@ -80,7 +81,7 @@
     {{ forms.textField({
       label: "AWS Region"|t,
       id: 'awsRegion',
-      name: 'awsRegion',
+      name: 'settings[awsRegion]',
       value: settings.awsRegion ?? 'us-east-1',
     }) }}
   </div>
@@ -89,7 +90,7 @@
     {{ forms.autosuggestField({
       label: "Azure Endpoint"|t,
       id: 'azureEndpoint',
-      name: 'azureEndpoint',
+      name: 'settings[azureEndpoint]',
       value: settings.azureEndpoint,
       suggestEnvVars: true,
       placeholder: 'ALTOMATIC_AZURE_ENDPOINT',
@@ -97,7 +98,7 @@
     {{ forms.autosuggestField({
       label: "Azure Key"|t,
       id: 'azureKey',
-      name: 'azureKey',
+      name: 'settings[azureKey]',
       value: settings.azureKey,
       suggestEnvVars: true,
       placeholder: 'ALTOMATIC_AZURE_KEY',

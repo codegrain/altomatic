@@ -50,12 +50,9 @@ class Altomatic extends Plugin
 
         // permissions
         Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function (RegisterUserPermissionsEvent $event) {
-            $event->permissions[] = [
-                'heading' => Craft::t('app', 'Altomatic'),
-                'permissions' => [
-                    'altomatic:generate' => ['label' => Craft::t('app', 'Generate ALT text')],
-                    'altomatic:settings' => ['label' => Craft::t('app', 'Manage Altomatic settings')],
-                ],
+            $event->permissions['Altomatic'] = [
+                'altomatic:generate' => ['label' => Craft::t('app', 'Generate ALT text')],
+                'altomatic:settings' => ['label' => Craft::t('app', 'Manage Altomatic settings')],
             ];
         });
 
@@ -102,7 +99,7 @@ class Altomatic extends Plugin
                 $form .= HtmlHelper::csrfInput();
                 $form .= HtmlHelper::hiddenInput('assetId', (string)$asset->id);
                 $form .= HtmlHelper::hiddenInput('redirect', $signedRedirect);
-                $form .= HtmlHelper::tag('button', $label, ['class' => 'btn submit fullwidth']);
+                $form .= HtmlHelper::tag('button', $label, ['class' => 'btn submit fullwidth', 'type' => 'submit']);
                 $form .= HtmlHelper::endForm();
 
                 $html .= $form;
