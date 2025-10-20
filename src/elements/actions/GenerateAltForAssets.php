@@ -16,7 +16,10 @@ class GenerateAltForAssets extends ElementAction
 
     public function performAction(ElementQueryInterface $query): bool
     {
-        $this->requirePermission('altomatic:generate');
+        if (!Craft::$app->getUser()->checkPermission('altomatic:generate')) {
+            $this->setMessage('Permission denied.');
+            return false;
+        }
 
         $ids = $query->ids();
         if (!$ids) {
