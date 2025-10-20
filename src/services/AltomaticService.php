@@ -38,10 +38,16 @@ class AltomaticService extends Component
             $imgUrl = $this->getLocalFilePath($asset);
         }
 
+        if (!$imgUrl) {
+            Craft::error("No image URL or path found for asset {$asset->id}", __METHOD__);
+            return null;
+        }
+
         $provider = $this->getProvider();
         $alt = $provider->generateAlt($asset, $imgUrl);
 
         if (!$alt) {
+            Craft::error("Provider returned empty ALT for asset {$asset->id} with image: " . substr($imgUrl, 0, 100), __METHOD__);
             return null;
         }
 
