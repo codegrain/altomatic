@@ -5,9 +5,11 @@ use Craft;
 use GuzzleHttp\Client;
 use craft\elements\Asset;
 use altomatic\Altomatic;
+use altomatic\traits\LoggingTrait;
 
 class OpenAIProvider implements ProviderInterface
 {
+    use LoggingTrait;
     public function generateAlt(Asset $asset, ?string $imageInput): ?string
     {
         $s = Altomatic::$plugin->getSettings();
@@ -15,7 +17,7 @@ class OpenAIProvider implements ProviderInterface
         $model  = $s->openAiModel ?: 'gpt-4o-mini';
 
         if (!$apiKey || !$imageInput) {
-            Craft::error("OpenAI missing API key or image input. Key: " . ($apiKey ? 'present' : 'missing') . ", Input: " . ($imageInput ? substr($imageInput, 0, 50) : 'missing'), __METHOD__);
+            $this->logError("OpenAI missing API key or image input. Key: " . ($apiKey ? 'present' : 'missing') . ", Input: " . ($imageInput ? substr($imageInput, 0, 50) : 'missing'));
             return null;
         }
 
@@ -57,11 +59,11 @@ class OpenAIProvider implements ProviderInterface
             $body = json_decode((string)$res->getBody(), true);
             $result = trim($body['choices'][0]['message']['content'] ?? '') ?: null;
             if (!$result) {
-                Craft::error("OpenAI returned empty response: " . json_encode($body), __METHOD__);
+                $this->logError("OpenAI returned empty response: " . json_encode($body));
             }
             return $result;
         } catch (\Throwable $e) {
-            Craft::error('OpenAI error: ' . $e->getMessage(), __METHOD__);
+            $this->logError('OpenAI error: ' . $e->getMessage());
             return null;
         }
     }

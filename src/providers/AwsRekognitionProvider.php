@@ -5,9 +5,11 @@ use Craft;
 use GuzzleHttp\Client;
 use craft\elements\Asset;
 use altomatic\Altomatic;
+use altomatic\traits\LoggingTrait;
 
 class AwsRekognitionProvider implements ProviderInterface
 {
+    use LoggingTrait;
     public function generateAlt(Asset $asset, ?string $imageInput): ?string
     {
         $s = Altomatic::$plugin->getSettings();
@@ -48,7 +50,7 @@ class AwsRekognitionProvider implements ProviderInterface
             $phrase = implode(', ', $top);
             return $this->toAlt($phrase);
         } catch (\Throwable $e) {
-            Craft::error('AWS Rekognition error: ' . $e->getMessage(), __METHOD__);
+            $this->logError('AWS Rekognition error: ' . $e->getMessage());
             return null;
         }
     }

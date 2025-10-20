@@ -6,11 +6,14 @@ use craft\web\Controller;
 use craft\elements\Asset;
 use altomatic\Altomatic;
 use altomatic\jobs\GenerateAltJob;
+use altomatic\traits\LoggingTrait;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
 
 class GenerateController extends Controller
 {
+    use LoggingTrait;
+    
     protected array|int|bool $allowAnonymous = false;
 
     public function actionGenerateForAsset(int $assetId): Response
@@ -44,7 +47,7 @@ class GenerateController extends Controller
         $this->requirePostRequest();
         $this->requirePermission('altomatic:generate');
 
-        Craft::error('ALTOMATIC: actionQueueAsset called!', __METHOD__);
+        $this->logInfo('Altomatic: actionQueueAsset called!');
         $request = Craft::$app->getRequest();
         $assetId = (int)$request->getRequiredBodyParam('assetId');
 

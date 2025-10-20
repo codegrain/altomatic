@@ -5,9 +5,11 @@ use Craft;
 use GuzzleHttp\Client;
 use craft\elements\Asset;
 use altomatic\Altomatic;
+use altomatic\traits\LoggingTrait;
 
 class GoogleVisionProvider implements ProviderInterface
 {
+    use LoggingTrait;
     public function generateAlt(Asset $asset, ?string $imageInput): ?string
     {
         $s = Altomatic::$plugin->getSettings();
@@ -40,7 +42,7 @@ class GoogleVisionProvider implements ProviderInterface
             $phrase = implode(', ', $top);
             return $this->toAlt($phrase);
         } catch (\Throwable $e) {
-            Craft::error('Google Vision error: ' . $e->getMessage(), __METHOD__);
+            $this->logError('Google Vision error: ' . $e->getMessage());
             return null;
         }
     }
