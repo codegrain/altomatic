@@ -31,7 +31,6 @@
             <th>Action</th>
             <th style="width:100px;">Asset ID</th>
             <th style="width:100px;">Count</th>
-            <th>Notes</th>
           </tr>
         </thead>
         <tbody>
@@ -42,7 +41,6 @@
             <td>{{ r.action }}</td>
             <td>{{ r.assetId ?: '—' }}</td>
             <td>{{ r.count ?: '—' }}</td>
-            <td>{{ r.notes ?: '—' }}</td>
           </tr>
         {% endfor %}
         </tbody>
