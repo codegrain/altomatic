@@ -11,7 +11,7 @@ class GenerateAltForAssets extends ElementAction
 {
     public static function displayName(): string
     {
-        return Craft::t('app', 'Generate Alt (Altomatic)');
+        return Craft::t('app', 'Generate Alt');
     }
 
     public function performAction(ElementQueryInterface $query): bool
