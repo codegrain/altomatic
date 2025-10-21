@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.3 - 2025-10-20
+### Fixed
+- Fixed Asset ID column showing "—" in Recent Actions by properly passing the first selected asset ID to logAction
+- Updated text consistency: changed "ALT" to "Alt" throughout the interface
+- Removed Notes column from Recent Actions table for cleaner dashboard interface
+
+### Changed
+- Improved Recent Actions logging to display actual asset IDs instead of null values
+
 ## 1.0.2 - 2025-08-13
 ### Added
 - Top-level **Altomatic** CP section with **Dashboard** and **Settings** subnav.
