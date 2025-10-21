@@ -10,9 +10,12 @@ use altomatic\providers\OpenAIProvider;
 use altomatic\providers\GoogleVisionProvider;
 use altomatic\providers\AwsRekognitionProvider;
 use altomatic\providers\AzureVisionProvider;
+use altomatic\traits\LoggingTrait;
 
 class AltomaticService extends Component
 {
+    use LoggingTrait;
+
     public function generateForAsset(Asset $asset): ?string
     {
         if ($asset->kind !== Asset::KIND_IMAGE) {
@@ -21,7 +24,7 @@ class AltomaticService extends Component
 
         $errors = [];
         if (!$this->isConfigured($errors)) {
-            Craft::warning('Altomatic not configured: ' . implode('; ', $errors), __METHOD__);
+            $this->logWarning('Altomatic not configured: ' . implode('; ', $errors));
             return null;
         }
 
@@ -38,10 +41,16 @@ class AltomaticService extends Component
             $imgUrl = $this->getLocalFilePath($asset);
         }
 
+        if (!$imgUrl) {
+            $this->logError("No image URL or path found for asset {$asset->id}");
+            return null;
+        }
+
         $provider = $this->getProvider();
         $alt = $provider->generateAlt($asset, $imgUrl);
 
         if (!$alt) {
+            $this->logError("Provider returned empty Alt for asset {$asset->id} with image: " . substr($imgUrl, 0, 100));
             return null;
         }
 
@@ -70,8 +79,8 @@ class AltomaticService extends Component
 
         switch ($s->provider) {
             case 'google':
-                $key = $s->googleApiKey ?: getenv('ALTOMATIC_GOOGLE_API_KEY');
-                if (!$key) $errors[] = 'Google API Key is missing (ALTOMATIC_GOOGLE_API_KEY).';
+                $key = $s->googleApiKey ?: getenv('AltOMATIC_GOOGLE_API_KEY');
+                if (!$key) $errors[] = 'Google API Key is missing (AltOMATIC_GOOGLE_API_KEY).';
                 break;
             case 'aws':
                 $key = $s->awsKey ?: getenv('ALTOMATIC_AWS_KEY');
@@ -126,7 +135,7 @@ class AltomaticService extends Component
                 'createdAt' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
             ])->execute();
         } catch (\Throwable $e) {
-            Craft::error('Altomatic logAction error: ' . $e->getMessage(), __METHOD__);
+            $this->logError('Altomatic logAction error: ' . $e->getMessage());
         }
     }
 
@@ -140,7 +149,7 @@ class AltomaticService extends Component
                 [':lim' => $limit]
             )->queryAll();
         } catch (\Throwable $e) {
-            Craft::error('Altomatic getRecentLogs error: ' . $e->getMessage(), __METHOD__);
+            $this->logError('Altomatic getRecentLogs error: ' . $e->getMessage());
             return [];
         }
     }
@@ -173,8 +182,10 @@ class AltomaticService extends Component
                 return rtrim($fs->getRootPath(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $path;
             }
         } catch (\Throwable $e) {
-            Craft::error($e->getMessage(), __METHOD__);
+            $this->logError('Error getting local file path: ' . $e->getMessage());
         }
         return null;
     }
+
+
 }

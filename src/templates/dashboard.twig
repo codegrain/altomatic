@@ -10,11 +10,11 @@
         <p style="font-size:24px; font-weight:600;">{{ stats.total }}</p>
       </div>
       <div class="pane" style="flex:1; min-width:220px; margin-block: 0;">
-        <h3>With ALT</h3>
+        <h3>With Alt</h3>
         <p style="font-size:24px; font-weight:600;">{{ stats.withAlt }}</p>
       </div>
       <div class="pane" style="flex:1; min-width:220px; margin-block: 0;">
-        <h3>Without ALT</h3>
+        <h3>Without Alt</h3>
         <p style="font-size:24px; font-weight:600;">{{ stats.withoutAlt }}</p>
       </div>
     </div>
@@ -31,7 +31,6 @@
             <th>Action</th>
             <th style="width:100px;">Asset ID</th>
             <th style="width:100px;">Count</th>
-            <th>Notes</th>
           </tr>
         </thead>
         <tbody>
@@ -42,7 +41,6 @@
             <td>{{ r.action }}</td>
             <td>{{ r.assetId ?: '—' }}</td>
             <td>{{ r.count ?: '—' }}</td>
-            <td>{{ r.notes ?: '—' }}</td>
           </tr>
         {% endfor %}
         </tbody>

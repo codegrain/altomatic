@@ -5,12 +5,9 @@ use Craft;
 use craft\base\Element;
 use craft\base\Plugin;
 use craft\elements\Asset;
-use craft\events\DefineHtmlEvent;
 use craft\events\RegisterElementActionsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
-use craft\helpers\UrlHelper;
-use craft\helpers\Html as HtmlHelper;
 use craft\services\UserPermissions;
 use craft\web\UrlManager;
 use yii\base\Event;
@@ -19,12 +16,15 @@ use altomatic\models\Settings;
 use altomatic\assetbundles\cp\CpAssetBundle;
 use altomatic\elements\actions\GenerateAltForAssets;
 use altomatic\services\AltomaticService;
+use altomatic\traits\LoggingTrait;
 
 /**
  * @property-read AltomaticService $altomaticService
  */
 class Altomatic extends Plugin
 {
+    use LoggingTrait;
+    
     public bool $hasCpSettings = true;
     public bool $hasCpSection  = true;
     public static Altomatic $plugin;
@@ -38,84 +38,25 @@ class Altomatic extends Plugin
             'altomaticService' => AltomaticService::class,
         ]);
 
-        // routes
+                        // routes
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules['altomatic'] = 'altomatic/dashboard/index';
             $event->rules['altomatic/dashboard'] = 'altomatic/dashboard/index';
             $event->rules['altomatic/settings'] = 'altomatic/dashboard/settings';
-            $event->rules['altomatic/generate/asset/<assetId:\d+>'] = 'altomatic/generate/generate-for-asset';
-            $event->rules['altomatic/generate/asset'] = 'altomatic/generate/generate-for-asset';
             $event->rules['altomatic/generate/queue-all'] = 'altomatic/generate/queue-all';
         });
 
         // permissions
         Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function (RegisterUserPermissionsEvent $event) {
             $event->permissions['Altomatic'] = [
-                'altomatic:generate' => ['label' => Craft::t('app', 'Generate ALT text')],
+                'altomatic:generate' => ['label' => Craft::t('app', 'Generate Alt text')],
                 'altomatic:settings' => ['label' => Craft::t('app', 'Manage Altomatic settings')],
             ];
         });
 
-        // bulk action
+        // element actions
         Event::on(Asset::class, Element::EVENT_REGISTER_ACTIONS, function (RegisterElementActionsEvent $event) {
             $event->actions[] = GenerateAltForAssets::class;
-        });
-
-        // per-asset sidebar section
-        Event::on(Asset::class, Element::EVENT_DEFINE_SIDEBAR_HTML, static function (DefineHtmlEvent $event) {
-            if (!Craft::$app->getUser()->checkPermission('altomatic:generate')) {
-                return;
-            }
-            $asset = $event->sender;
-            if (!$asset instanceof Asset || !$asset->id || $asset->kind !== Asset::KIND_IMAGE) {
-                return;
-            }
-
-            $service = Altomatic::$plugin->altomaticService;
-            $errors = [];
-            $isConfigured = $service->isConfigured($errors);
-
-            $dashboardUrl = UrlHelper::cpUrl('altomatic/dashboard');
-            $settingsUrl  = UrlHelper::cpUrl('altomatic/settings');
-
-            $settings = Altomatic::$plugin->getSettings();
-            $providerLabel = [
-                'openai' => 'OpenAI',
-                'google' => 'Google Vision',
-                'aws'    => 'AWS Rekognition',
-                'azure'  => 'Azure Vision',
-            ][$settings->provider ?? 'openai'] ?? 'OpenAI';
-
-            $html = '<div class="meta"><div class="field"><div class="heading"><label>Altomatic</label></div>';
-            $html .= '<div class="instructions"><p>Provider: <strong>' . HtmlHelper::encode($providerLabel) . '</strong> • Target: <code>alt</code></p></div>';
-
-            if ($isConfigured) {
-                $postUrl  = UrlHelper::actionUrl('altomatic/generate/queue-asset');
-                $redirect = $asset->getCpEditUrl();
-                $signedRedirect = Craft::$app->getSecurity()->hashData($redirect);
-                $label    = Craft::t('app', 'Generate ALT with Altomatic');
-
-                $form  = HtmlHelper::beginForm($postUrl, 'post', ['class' => 'mt-2']);
-                $form .= HtmlHelper::csrfInput();
-                $form .= HtmlHelper::hiddenInput('assetId', (string)$asset->id);
-                $form .= HtmlHelper::hiddenInput('redirect', $signedRedirect);
-                $form .= HtmlHelper::tag('button', $label, ['class' => 'btn submit fullwidth']);
-                $form .= HtmlHelper::endForm();
-
-                $html .= $form;
-                $html .= '<p class="light" style="margin-top:6px"><a href="' . HtmlHelper::encode($dashboardUrl) . '">Open Altomatic Dashboard</a> • <a href="' . HtmlHelper::encode($settingsUrl) . '">Settings</a></p>';
-            } else {
-                $html .= '<div class="warning" style="margin-top:0;padding:1rem;border-top:1px solid var(--border-hairline);"><p><strong>Altomatic is not configured.</strong></p>';
-                if ($errors) {
-                    $html .= '<ul class="errors" style="margin:6px 0 0 1em;">';
-                    foreach ($errors as $e) $html .= '<li>' . HtmlHelper::encode($e) . '</li>';
-                    $html .= '</ul>';
-                }
-                $html .= '<p class="light" style="margin-top:6px"><a href="' . HtmlHelper::encode($settingsUrl) . '">Configure in Settings</a> • <a href="' . HtmlHelper::encode($dashboardUrl) . '">View Dashboard</a></p></div>';
-            }
-
-            $html .= '</div></div>';
-            $event->html .= $html;
         });
 
         if (Craft::$app->getRequest()->getIsCpRequest()) {
@@ -126,7 +67,7 @@ class Altomatic extends Plugin
         try {
             $this->getAltomaticService()->ensureLogTable();
         } catch (\Throwable $e) {
-            Craft::error('Altomatic ensureLogTable error: ' . $e->getMessage(), __METHOD__);
+            $this->logError('Altomatic ensureLogTable error: ' . $e->getMessage());
         }
     }
 

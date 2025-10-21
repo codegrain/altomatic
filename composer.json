@@ -1,9 +1,15 @@
 {
   "name": "codegrain/altomatic",
-  "description": "Automatically generate AI-powered ALT text for Craft CMS",
+  "description": "Automatically generate AI-powered Alt text for Craft CMS",
   "type": "craft-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "proprietary",
+  "authors": [
+    {
+      "name": "Codegrain",
+      "homepage": "https://github.com/codegrain"
+    }
+  ],
   "keywords": ["craftcms", "assets", "alt text", "seo", "accessibility", "ai"],
   "require": {
     "php": "^8.2",
@@ -19,7 +25,7 @@
     "name": "Altomatic",
     "handle": "altomatic",
     "class": "altomatic\\Altomatic",
-    "description": "Automatically generate AI-powered ALT text for Craft CMS",
+    "description": "Automatically generate AI-powered Alt text for Craft CMS",
     "schemaVersion": "1.0.0",
     "hasCpSettings": true,
     "hasCpSection": true

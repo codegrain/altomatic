@@ -29,6 +29,7 @@ class Settings extends Model
     {
         return [
             [['provider'], 'string'],
+            [['provider'], 'in', 'range' => ['openai', 'google', 'aws', 'azure']],
             [['overwriteExisting'], 'boolean'],
             [['openAiApiKey', 'openAiModel', 'googleApiKey', 'awsKey', 'awsSecret', 'awsRegion', 'azureEndpoint', 'azureKey'], 'safe'],
         ];

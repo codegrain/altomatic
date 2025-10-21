@@ -5,9 +5,12 @@ use Craft;
 use craft\queue\BaseJob;
 use craft\elements\Asset;
 use altomatic\Altomatic;
+use altomatic\traits\LoggingTrait;
 
 class GenerateAltJob extends BaseJob
 {
+    use LoggingTrait;
+    
     /** @var int[] */
     public array $assetIds = [];
 
@@ -24,13 +27,13 @@ class GenerateAltJob extends BaseJob
             try {
                 Altomatic::$plugin->altomaticService->generateForAsset($asset);
             } catch (\Throwable $e) {
-                Craft::error("Altomatic job error for asset {$id}: " . $e->getMessage(), __METHOD__);
+                $this->logError("Altomatic job error for asset {$id}: " . $e->getMessage());
             }
         }
     }
 
     protected function defaultDescription(): ?string
     {
-        return $this->description ?: 'Altomatic: Generate ALT';
+        return $this->description ?: 'Altomatic: Generate Alt';
     }
 }
