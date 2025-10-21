@@ -3,7 +3,6 @@
 {% set title = title ?? "Altomatic Settings" %}
 
 {% block content %}
-Hello
 <form method="post" accept-charset="UTF-8">
   {{ csrfInput() }}
   {{ actionInput('plugins/save-plugin-settings') }}
