@@ -49,7 +49,7 @@ class Altomatic extends Plugin
         // permissions
         Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function (RegisterUserPermissionsEvent $event) {
             $event->permissions['Altomatic'] = [
-                'altomatic:generate' => ['label' => Craft::t('app', 'Generate ALT text')],
+                'altomatic:generate' => ['label' => Craft::t('app', 'Generate Alt text')],
                 'altomatic:settings' => ['label' => Craft::t('app', 'Manage Altomatic settings')],
             ];
         });

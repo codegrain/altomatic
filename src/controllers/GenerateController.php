@@ -32,12 +32,12 @@ class GenerateController extends Controller
         foreach ($chunks as $i => $chunk) {
             $queue->push(new GenerateAltJob([
                 'assetIds' => $chunk,
-                'description' => "Altomatic: Generate ALT (batch ".($i+1)."/".count($chunks).")",
+                'description' => "Altomatic: Generate Alt (batch ".($i+1)."/".count($chunks).")",
             ]));
         }
 
         Altomatic::$plugin->altomaticService->logAction('queue-all', null, count($ids));
-        Craft::$app->getSession()->setNotice('Queued ALT generation for all images.');
+        Craft::$app->getSession()->setNotice('Queued Alt generation for all images.');
         return $this->asJson(['ok' => true, 'queued' => count($ids)]);
     }
 }

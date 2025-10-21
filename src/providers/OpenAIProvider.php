@@ -26,7 +26,7 @@ class OpenAIProvider implements ProviderInterface
             ? ['type' => 'image_url', 'image_url' => ['url' => $imageInput]]
             : $this->encodeLocalAsInputImage($imageInput);
 
-        $prompt = "Describe this image as concise ALT text (<= 125 characters), no emojis, no prefixes.";
+        $prompt = "Describe this image as concise Alt text (<= 125 characters), no emojis, no prefixes.";
 
         try {
             $client = new Client([
@@ -42,7 +42,7 @@ class OpenAIProvider implements ProviderInterface
                 'json' => [
                     'model' => $model,
                     'messages' => [
-                        ['role' => 'system', 'content' => 'You write succinct, descriptive ALT attributes.'],
+                        ['role' => 'system', 'content' => 'You write succinct, descriptive Alt attributes.'],
                         [
                             'role' => 'user',
                             'content' => [

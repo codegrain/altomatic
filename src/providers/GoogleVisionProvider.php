@@ -58,7 +58,7 @@ class GoogleVisionProvider implements ProviderInterface
 
     private function toAlt(string $labels): string
     {
-        // Make it read nicely as ALT text
+        // Make it read nicely as Alt text
         $alt = $labels;
         // Capitalize first, remove trailing punctuation, limit length
         $alt = trim($alt, " \t\n\r\0\x0B,.");

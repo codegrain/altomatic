@@ -34,6 +34,6 @@ class GenerateAltJob extends BaseJob
 
     protected function defaultDescription(): ?string
     {
-        return $this->description ?: 'Altomatic: Generate ALT';
+        return $this->description ?: 'Altomatic: Generate Alt';
     }
 }
