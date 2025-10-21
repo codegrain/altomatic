@@ -7,7 +7,6 @@ use craft\elements\Asset;
 use altomatic\Altomatic;
 use altomatic\jobs\GenerateAltJob;
 use altomatic\traits\LoggingTrait;
-use yii\web\BadRequestHttpException;
 use yii\web\Response;
 
 class GenerateController extends Controller
@@ -15,67 +14,6 @@ class GenerateController extends Controller
     use LoggingTrait;
     
     protected array|int|bool $allowAnonymous = false;
-
-    public function actionGenerateForAsset(int $assetId): Response
-    {
-        $this->requirePermission('altomatic:generate');
-
-        /** @var ?Asset $asset */
-        $asset = Craft::$app->getElements()->getElementById($assetId, Asset::class);
-        if (!$asset) {
-            throw new BadRequestHttpException('Asset not found.');
-        }
-
-        $errors = [];
-        if (!Altomatic::$plugin->altomaticService->isConfigured($errors)) {
-            Craft::$app->getSession()->setError('Altomatic is not configured: ' . implode(' ', $errors));
-            return $this->redirect($asset->getCpEditUrl() ?? '/admin/assets');
-        }
-
-        Craft::$app->getQueue()->push(new GenerateAltJob([
-            'assetIds' => [$asset->id],
-            'description' => "Altomatic: Generate ALT for asset {$asset->id}",
-        ]));
-
-        Altomatic::$plugin->altomaticService->logAction('queue-asset', $asset->id, 1);
-        Craft::$app->getSession()->setNotice('Queued ALT generation (will populate the asset’s Alternative Text).');
-        return $this->redirect($asset->getCpEditUrl() ?? '/admin/assets');
-    }
-
-    public function actionQueueAsset(): Response
-    {
-        $this->requirePostRequest();
-        $this->requirePermission('altomatic:generate');
-
-        $this->logInfo('Altomatic: actionQueueAsset called!');
-        $request = Craft::$app->getRequest();
-        $assetId = (int)$request->getRequiredBodyParam('assetId');
-
-        /** @var ?Asset $asset */
-        $asset = Craft::$app->getElements()->getElementById($assetId, Asset::class);
-        if (!$asset) {
-            throw new BadRequestHttpException('Asset not found.');
-        }
-
-        $errors = [];
-        if (!Altomatic::$plugin->altomaticService->isConfigured($errors)) {
-            Craft::$app->getSession()->setError('Altomatic is not configured: ' . implode(' ', $errors));
-            return $this->redirectToPostedUrl($asset) ?: $this->redirect($asset->getCpEditUrl() ?? '/admin/assets');
-        }
-
-        Craft::$app->getQueue()->push(new GenerateAltJob([
-            'assetIds' => [$asset->id],
-            'description' => "Altomatic: Generate ALT for asset {$asset->id}",
-        ]));
-
-        Altomatic::$plugin->altomaticService->logAction('queue-asset', $asset->id, 1);
-        Craft::$app->getSession()->setNotice('Queued ALT generation (will populate the asset\'s Alternative Text).');
-        $redirect = $request->getBodyParam('redirect');
-        if ($redirect && ($redirectUrl = Craft::$app->getSecurity()->validateData($redirect))) {
-            return $this->redirect($redirectUrl);
-        }
-        return $this->redirect($asset->getCpEditUrl() ?? '/admin/assets');
-    }
 
     public function actionQueueAll(): Response
     {
