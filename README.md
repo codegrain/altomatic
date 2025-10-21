@@ -46,9 +46,9 @@ ALTOMATIC_AZURE_KEY="your-key"
 
 ## Usage
 
-- **Bulk**: Assets index → select images → "Generate Alt" action
-- **All images**: Assets toolbar → "Generate Alt for All" button  
-- **Dashboard**: View stats and activity at **Altomatic → Dashboard**
+- Select images in Assets index and use "Generate Alt" action
+- Use "Generate Alt for All" button in Assets toolbar for all images
+- Check stats and activity in Altomatic Dashboard
 
 ## Requirements
 
