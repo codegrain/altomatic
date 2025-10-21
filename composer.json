@@ -4,6 +4,12 @@
   "type": "craft-plugin",
   "version": "1.0.3",
   "license": "proprietary",
+  "authors": [
+    {
+      "name": "Codegrain",
+      "homepage": "https://github.com/codegrain"
+    }
+  ],
   "keywords": ["craftcms", "assets", "alt text", "seo", "accessibility", "ai"],
   "require": {
     "php": "^8.2",
