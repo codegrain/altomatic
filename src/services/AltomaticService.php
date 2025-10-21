@@ -50,7 +50,7 @@ class AltomaticService extends Component
         $alt = $provider->generateAlt($asset, $imgUrl);
 
         if (!$alt) {
-            $this->logError("Provider returned empty ALT for asset {$asset->id} with image: " . substr($imgUrl, 0, 100));
+            $this->logError("Provider returned empty Alt for asset {$asset->id} with image: " . substr($imgUrl, 0, 100));
             return null;
         }
 
@@ -79,8 +79,8 @@ class AltomaticService extends Component
 
         switch ($s->provider) {
             case 'google':
-                $key = $s->googleApiKey ?: getenv('ALTOMATIC_GOOGLE_API_KEY');
-                if (!$key) $errors[] = 'Google API Key is missing (ALTOMATIC_GOOGLE_API_KEY).';
+                $key = $s->googleApiKey ?: getenv('AltOMATIC_GOOGLE_API_KEY');
+                if (!$key) $errors[] = 'Google API Key is missing (AltOMATIC_GOOGLE_API_KEY).';
                 break;
             case 'aws':
                 $key = $s->awsKey ?: getenv('ALTOMATIC_AWS_KEY');

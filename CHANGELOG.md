@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## 1.0.2 - 2025-08-13
 ### Added
 - Top-level **Altomatic** CP section with **Dashboard** and **Settings** subnav.
-- Dashboard showing totals for images with/without ALT, plus a recent actions log.
+- Dashboard showing totals for images with/without Alt, plus a recent actions log.
 - Lightweight action logging (queue single, selected, all) with user and timestamp.
 - Config guardrails: if provider creds/envs are missing, the sidebar shows a warning and controllers surface clear errors.
 - Improved per-asset sidebar UI: labeled panel, primary action button, quick links.

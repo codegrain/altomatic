@@ -12,11 +12,11 @@
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'btn';
-    btn.textContent = 'Generate ALT for All (Altomatic)';
+    btn.textContent = 'Generate Alt for All (Altomatic)';
     btn.setAttribute('data-altomatic-generate-all', '1');
 
     btn.addEventListener('click', async () => {
-      if (!confirm('Queue ALT generation for ALL images?')) return;
+      if (!confirm('Queue Alt generation for ALL images?')) return;
       try {
         const res = await fetch(Craft.getCpUrl('altomatic/generate/queue-all'), {
           method: 'POST',
@@ -24,9 +24,9 @@
         });
         const json = await res.json().catch(() => ({}));
         if (res.ok && json.ok) {
-          Craft.cp.displayNotice('Queued ALT generation for all images.');
+          Craft.cp.displayNotice('Queued Alt generation for all images.');
         } else {
-          Craft.cp.displayError(json.error || 'Failed to queue ALT generation.');
+          Craft.cp.displayError(json.error || 'Failed to queue Alt generation.');
         }
       } catch (e) {
         Craft.cp.displayError('Network error.');

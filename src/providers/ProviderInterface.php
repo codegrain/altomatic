@@ -6,7 +6,7 @@ use craft\elements\Asset;
 interface ProviderInterface
 {
     /**
-     * Return a concise, human-readable ALT text for the given image.
+     * Return a concise, human-readable Alt text for the given image.
      *
      * @param Asset $asset
      * @param string|null $imageInput URL or local file path

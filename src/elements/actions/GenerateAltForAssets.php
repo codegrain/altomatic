@@ -11,7 +11,7 @@ class GenerateAltForAssets extends ElementAction
 {
     public static function displayName(): string
     {
-        return Craft::t('app', 'Generate ALT (Altomatic)');
+        return Craft::t('app', 'Generate Alt (Altomatic)');
     }
 
     public function performAction(ElementQueryInterface $query): bool
@@ -29,11 +29,11 @@ class GenerateAltForAssets extends ElementAction
 
         Craft::$app->getQueue()->push(new GenerateAltJob([
             'assetIds' => $ids,
-            'description' => 'Altomatic: Generate ALT for selection',
+            'description' => 'Altomatic: Generate Alt for selection',
         ]));
 
-        Altomatic::$plugin->altomaticService->logAction('queue-selected', null, count($ids));
-        $this->setMessage('Queued ALT generation for selected assets.');
+        Altomatic::$plugin->altomaticService->logAction('queue-selected', $ids[0], count($ids), 'Asset IDs: ' . implode(',', $ids));
+        $this->setMessage('Queued Alt generation for selected assets.');
         return true;
     }
 }
