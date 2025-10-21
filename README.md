@@ -7,11 +7,11 @@ AI-powered Alt text generation for Craft CMS 5 using OpenAI, Google Vision, AWS 
 
 ## Key Features
 
-- **Bulk generation**: Generate Alt text for all images or selected assets
-- **Multiple AI providers**: OpenAI (default), Google Vision, AWS Rekognition, Azure Vision
-- **Dashboard**: View stats and recent activity
-- **Queue-based**: Background processing with chunking
-- **Permission control**: Fine-grained user permissions
+- Generate Alt text for all images or selected assets
+- Works with OpenAI, Google Vision, AWS Rekognition, and Azure Vision
+- View stats and recent activity in the dashboard
+- Processes images in the background using queues
+- Control which users can generate Alt text
 
 ## Installation
 
